@@ -68,6 +68,7 @@ void RendererBackendEGLTarget::init(RendererBackendEGL* backend, uint32_t width,
     m_width = width;
     m_height = height;
 
+    g_message("RendererBackendEGLTarget::init -> sendMessage");
     m_ipcChannel.sendMessage(IPC::EGLStreamState(IPC::EGLStreamState::State::WaitingForFd));
 }
 
@@ -104,11 +105,13 @@ void RendererBackendEGLTarget::frameWillRender() noexcept
 
         if (!m_producerStream)
         {
+            g_message("RendererBackendEGLTarget::frameWillRender -> sendMessage");
             m_ipcChannel.sendMessage(IPC::EGLStreamState(IPC::EGLStreamState::State::Error));
             g_critical("Cannot create the producer EGLStream on RendererBackendEGLTarget side");
             return;
         }
 
+        g_message("RendererBackendEGLTarget::frameWillRender2 -> sendMessage");
         m_ipcChannel.sendMessage(IPC::EGLStreamState(IPC::EGLStreamState::State::Connected));
     }
 
@@ -128,6 +131,8 @@ void RendererBackendEGLTarget::frameRendered() noexcept
 void RendererBackendEGLTarget::handleMessage(IPC::Channel& /*channel*/, const IPC::Message& message) noexcept
 {
     // Messages received on WPEWebProcess side from ViewBackend on application process side
+    g_message("RendererBackendEGLTarget::handleMessage: mes: %d, fdCount %d", message.getCode(), message.getFDCount());
+
     switch (message.getCode())
     {
     case IPC::EGLStreamFileDescriptor::MESSAGE_CODE:

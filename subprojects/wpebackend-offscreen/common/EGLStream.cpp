@@ -25,6 +25,7 @@
  */
 
 #include "EGLStream.h"
+#include <unistd.h>
 
 namespace
 {

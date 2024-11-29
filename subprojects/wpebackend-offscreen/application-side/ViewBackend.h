@@ -35,6 +35,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <atomic>
 
 struct wpe_offscreen_view_backend
 {

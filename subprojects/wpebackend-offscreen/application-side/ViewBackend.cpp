@@ -37,6 +37,7 @@ wpe_view_backend_interface* ViewBackend::getWPEInterface() noexcept
     static wpe_view_backend_interface s_interface = {
         // void* create(void* params, wpe_view_backend* backend)
         +[](void* params, wpe_view_backend* backend) -> void* {
+            g_message("ViewBackend create");
             auto* viewParams = static_cast<ViewBackend::ViewParams*>(params);
             auto* viewBackend = new ViewBackend(*viewParams, backend);
             viewParams->userData = viewBackend;
@@ -45,10 +46,16 @@ wpe_view_backend_interface* ViewBackend::getWPEInterface() noexcept
         // void destroy(void* data)
         +[](void* data) { delete static_cast<ViewBackend*>(data); },
         // void initialize(void* data)
-        +[](void* data) { static_cast<ViewBackend*>(data)->init(); },
+        +[](void* data) {
+            g_message("ViewBackend initialize");
+            static_cast<ViewBackend*>(data)->init();
+        },
         // int get_renderer_host_fd(void* data)
-        +[](void* data) -> int { return static_cast<ViewBackend*>(data)->m_ipcChannel.detachPeerFd(); }, nullptr,
-        nullptr, nullptr, nullptr};
+        +[](void* data) -> int {
+            g_message("ViewBackend get_renderer_host_fd");
+            return static_cast<ViewBackend*>(data)->m_ipcChannel.detachPeerFd();
+        },
+        nullptr, nullptr, nullptr, nullptr};
 
     return &s_interface;
 }
@@ -158,6 +165,8 @@ void ViewBackend::frameComplete() noexcept
 
 void ViewBackend::handleMessage(IPC::Channel& /*channel*/, const IPC::Message& message) noexcept
 {
+    g_message("ViewBackend::handleMessage: mes: %d, fdCount %d", message.getCode(), message.getFDCount());
+
     // Messages received on application process side from RendererBackendEGLTarget on WPEWebProcess side
     switch (message.getCode())
     {
@@ -170,6 +179,7 @@ void ViewBackend::handleMessage(IPC::Channel& /*channel*/, const IPC::Message& m
                 int fd = m_consumerStream->getStreamFD();
                 if (fd != -1)
                 {
+                    g_message("ViewBackend::handleMessage -> sendMessage: %d", IPC::EGLStreamFileDescriptor(fd).getCode());
                     m_ipcChannel.sendMessage(IPC::EGLStreamFileDescriptor(fd));
                     m_consumerStream->closeStreamFD();
                     return;
@@ -325,6 +335,7 @@ gboolean ViewBackend::idleCallback(ViewBackend* backend) noexcept
     EGLImage frame = backend->m_availableFrame.exchange(EGL_NO_IMAGE);
     if (frame)
     {
+        // g_message("ViewBackend::idleCallback -> idleCallback");
         if (backend->m_viewParams.onFrameAvailableCB)
             backend->m_viewParams.onFrameAvailableCB(backend, frame, backend->m_viewParams.userData);
         else

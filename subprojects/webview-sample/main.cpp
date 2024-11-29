@@ -92,6 +92,8 @@ int main(int /*argc*/, const char* /*argv*/[])
         &config);
 
     auto* wkWebView = createWebView(*nativeSurface);
+    g_message("[webview] loading uri");
+
     // webkit_web_view_load_uri(wkWebView, "https://webglsamples.org/dynamic-cubemap/dynamic-cubemap.html");
     // webkit_web_view_load_uri(wkWebView, "https://webglsamples.org/electricflower/electricflower.html");
     // webkit_web_view_load_uri(wkWebView, "https://webglsamples.org/field/field.html");

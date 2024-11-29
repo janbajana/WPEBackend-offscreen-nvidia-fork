@@ -65,16 +65,26 @@ extern "C"
     __attribute__((visibility("default"))) wpe_loader_interface _wpe_loader_interface = {
         +[](const char* name) -> void* {
             if (std::strcmp(name, "_wpe_renderer_host_interface") == 0)
+            {
+                g_message("[backend] wpe loader wpe_renderer_host_interface");
                 return RendererHost::getWPEInterface();
+            }
 
             if (std::strcmp(name, "_wpe_renderer_backend_egl_interface") == 0)
+            {
+                g_message("[backend] wpe loader wpe_renderer_backend_egl_interface");
                 return RendererBackendEGL::getWPEInterface();
+            }
 
             if (std::strcmp(name, "_wpe_renderer_backend_egl_target_interface") == 0)
+            {
+                g_message("[backend] wpe loader wpe_renderer_backend_egl_target_interface");
                 return RendererBackendEGLTarget::getWPEInterface();
+            }
 
             if (std::strcmp(name, "_wpe_renderer_backend_egl_offscreen_target_interface") == 0)
             {
+                g_message("[backend] wpe loader wpe_renderer_backend_egl_offscreen_target_interface");
                 static wpe_renderer_backend_egl_offscreen_target_interface s_interface = {
                     +[]() -> void* { return nullptr; },
                     +[](void*) {},

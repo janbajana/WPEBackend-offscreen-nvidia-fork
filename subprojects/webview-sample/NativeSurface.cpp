@@ -31,6 +31,7 @@
 #include <X11/Xutil.h>
 
 #include <cassert>
+#include <glib.h>
 
 namespace
 {
@@ -283,7 +284,7 @@ void main()
         {
             GLchar* buffer = new GLchar[bufferSize];
             glGetProgramInfoLog(m_program, bufferSize, nullptr, buffer);
-            std::printf("Shader compilation error:\n%s\n", buffer);
+            g_message("Shader compilation error:\n%s\n", buffer);
             delete[] buffer;
         }
 

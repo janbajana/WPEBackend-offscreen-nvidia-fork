@@ -30,7 +30,10 @@ wpe_renderer_host_interface* RendererHost::getWPEInterface() noexcept
 {
     static wpe_renderer_host_interface s_interface = {
         // void* create()
-        +[]() -> void* { return new RendererHost(); },
+        +[]() -> void* {
+            g_message("[view] render host create");
+            return new RendererHost();
+        },
         // void destroy(void* data)
         +[](void* data) { delete static_cast<RendererHost*>(data); },
         // int create_client(void* data) => called each time a new WPEWebProcess needs to be launched, it fetches the
@@ -51,6 +54,7 @@ RendererHost::~RendererHost()
 
 RendererHostClient& RendererHost::addClient() noexcept
 {
+    g_message("[view] render host add client");
     m_clients.push_back(new RendererHostClient(this));
     return *m_clients.back();
 }
@@ -60,6 +64,7 @@ void RendererHost::removeClient(const RendererHostClient* client) noexcept
     if (!client)
         return;
 
+    g_message("[view] render host remove client");
     for (auto it = m_clients.cbegin(); it != m_clients.cend(); ++it)
     {
         if (*it == client)

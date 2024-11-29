@@ -28,6 +28,7 @@
 
 #include <cassert>
 #include <cerrno>
+#include <unistd.h>
 
 #include <sys/socket.h>
 
@@ -41,6 +42,8 @@ Channel::Channel(MessageHandler& handler) noexcept : m_handler(handler)
         g_critical("Cannot create Unix sockets pair for IPC channel");
         return;
     }
+
+    g_message("IPC Channel::Channel local: %d, peer: %d", sockets[0], sockets[1]);
 
     if (configureLocalEndpoint(sockets[0]))
         m_peerFd = sockets[1];
@@ -57,12 +60,15 @@ Channel::Channel(MessageHandler& handler, int peerFd) noexcept : m_handler(handl
     }
 
     configureLocalEndpoint(peerFd);
+    g_message("IPC Channel::Channel peer: %d, loc: %d", m_peerFd, m_localFd);
 }
 
 bool Channel::sendMessage(const Message& message) noexcept
 {
     if (m_localFd == -1)
         return false;
+
+    g_message(">>>>> IPC Channel::sendMessage peer: %d, loc: %d, mes: %d", m_peerFd, m_localFd, message.getCode());
 
     const ssize_t ret = send(m_localFd, &message, Message::MESSAGE_SIZE, MSG_EOR | MSG_NOSIGNAL);
     if (ret == 0)
@@ -206,6 +212,8 @@ bool Channel::readNextMessage(Message& message) noexcept
             buffer[i] = fd;
         }
     }
+
+    g_message("IPC Channel::readNextMessage peer: %d, loc: %d, mes: %d", m_peerFd, m_localFd, message.getCode());
 
     return true;
 }
